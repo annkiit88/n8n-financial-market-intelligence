@@ -1,0 +1,1134 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "67ece72c-b355-440f-8652-e176fcea2866",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://www.livemint.com/rss/markets",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "028ab3ce-5164-4abe-93ee-25dabecfa330",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "url": "https://www.moneycontrol.com/rss/marketreports.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        144
+      ],
+      "id": "108df86c-d25f-4517-83fc-f692aebbf866",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        96
+      ],
+      "id": "0a9fa80c-7eee-439e-8bf1-9c89f466b99d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "aead42a1-7f79-4f9f-a6e7-cca8f33c87f5",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        784,
+        112
+      ],
+      "id": "5675a6cf-11ed-4f56-bbeb-2b01b317e568",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        368
+      ],
+      "id": "3a8c440d-420a-4c68-856f-d365b21516db",
+      "name": "RSS Read2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "5fbe5b0e-4985-4ca6-b6ce-ca864b4d786e",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "link",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        112
+      ],
+      "id": "788e5297-439c-4a25-b322-c7c896a14998",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this finance news article.\n\nTitle: {{ $json.title }}\nURL: {{ $json.link }}\nDescription: {{ $json.contentSnippet || $json.content || $json.description }}\nPublished: {{ $json.pubDate || $json.isoDate }}\n\nReturn ONLY valid JSON. Do not use Markdown. Do not include ```json or any text outside the JSON.\n\nUse exactly this structure:\n\n{\n\"category\": \"Stocks | Markets | Economy | Banking | Fintech | Mutual Funds | IPO | Commodities | Forex | Crypto | Corporate | Personal Finance | Other\",\n\"importance_score\": 0,\n\"market_impact\": \"Bullish | Bearish | Neutral | Unclear\",\n\"key_points\": [\n\"point 1\",\n\"point 2\",\n\"point 3\"\n],\n\"summary\": \"3-5 sentence professional summary\",\n\"investor_relevance\": \"Why this matters to investors or finance professionals\",\n\"content_potential\": \"High | Medium | Low\",\n\"content_angle\": \"The strongest angle for a LinkedIn/X post\"\n}\n\nRules:\n\n* importance_score must be a number between 0 and 100.\n* market_impact MUST always be present.\n* market_impact MUST contain exactly ONE of these four values:\n  \"Bullish\", \"Bearish\", \"Neutral\", or \"Unclear\".\n* Use \"Bullish\" when the article describes developments that are clearly positive for the relevant company, sector, asset, or market.\n* Use \"Bearish\" when the article describes developments that are clearly negative for the relevant company, sector, asset, or market.\n* Use \"Neutral\" when the article describes information with no clearly positive or negative market implication.\n* Use \"Unclear\" when the article does not provide enough information to determine the likely market impact.\n* Never leave market_impact empty.\n* Never omit market_impact.\n* Never use any value other than the four specified values.\n* Use only information provided in the article.\n* Do not invent facts.\n* If information is insufficient, use \"Unclear\" rather than guessing.\n* key_points must contain exactly 3 concise points.\n* summary must contain 3-5 factual, professional sentences.\n* investor_relevance must explain why the information matters to investors or finance professionals using only information available in the article.\n* content_potential must be exactly \"High\", \"Medium\", or \"Low\".\n* content_angle must identify the strongest factual angle for a LinkedIn/X post.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1728,
+        32
+      ],
+      "id": "cc1efb3c-9f0d-416c-a105-f141f6cd40f4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "inclusionai/ling-3.0-flash-fin:free",
+        "options": {
+          "timeout": 360000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        368
+      ],
+      "id": "cf1702e3-188a-4252-a891-be633ed59628",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        112
+      ],
+      "id": "ab929976-5993-4742-802d-88f5e79b8229",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $json.output;\n\nlet analysis;\n\ntry {\n  if (typeof raw === 'string') {\n    raw = raw\n      .replace(/^```json\\s*/i, '')\n      .replace(/^```\\s*/i, '')\n      .replace(/\\s*```$/i, '')\n      .trim();\n\n    analysis = JSON.parse(raw);\n  } else {\n    analysis = raw;\n  }\n} catch (error) {\n  throw new Error(\"AI returned invalid JSON: \" + raw);\n}\n\nconst article = $('Remove Duplicates').item.json;\n\nreturn {\n  json: {\n    title: article.title,\n    link: article.link,\n    pubDate: article.pubDate || article.isoDate,\n\n    category: analysis.category || \"Other\",\n    importance_score: Number(analysis.importance_score) || 0,\n    market_impact: analysis.market_impact || \"Unclear\",\n    key_points: analysis.key_points || [],\n    summary: analysis.summary || \"\",\n    investor_relevance: analysis.investor_relevance || \"\",\n    content_potential: analysis.content_potential || \"Low\",\n    content_angle: analysis.content_angle || \"\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        128
+      ],
+      "id": "7543a06c-1ce3-4206-985c-4f28252143a8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d2b9d2e2-5026-4869-8130-fb4f1aa317c9",
+              "leftValue": "={{ $json.importance_score }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2304,
+        192
+      ],
+      "id": "cd8b025b-c706-4b69-bee0-f939e7c9c6d5",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json.title }}",
+        "options": {
+          "topic": "general",
+          "search_depth": "basic",
+          "max_results": 3,
+          "include_answer": "advanced"
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        128
+      ],
+      "id": "1c91253a-e79e-47dd-a930-e93e8fc76555",
+      "name": "Search",
+      "alwaysOutputData": true,
+      "credentials": {
+        "tavilyApi": {
+          "name": "Tavily account 2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior financial research analyst working for a professional market intelligence and investment research team.\n\nAnalyze the original finance article together with:\n1. Tavily web research\n2. LinkedIn industry intelligence\n3. X/Twitter industry intelligence\n\nYour goal is to produce a fact-based, professional financial intelligence briefing suitable for investors, analysts, portfolio managers, founders and senior finance professionals.\n\nORIGINAL ARTICLE\n\nTitle:\n{{ $('Remove Duplicates').item.json.title }}\n\nURL:\n{{ $('Remove Duplicates').item.json.link }}\n\nTAVILY / WEB RESEARCH\n\nAnswer:\n{{ $json.answer || \"\" }}\n\nResearch Sources:\n{{ JSON.stringify($json.results || []) }}\n\nSOCIAL / INDUSTRY INTELLIGENCE\n\n{{ JSON.stringify($json.social_intelligence || []) }}\n\nYour task:\n\n1. Verify the important claims in the original article using the web research.\n\n2. Identify any conflicting information between:\n   - the original article\n   - Tavily research\n   - LinkedIn discussions\n   - X discussions\n\n3. Identify important facts or context missing from the original article.\n\n4. Analyze what finance professionals and market participants appear to be discussing about this topic.\n\n5. Identify the dominant industry narrative.\n\n6. Identify whether there appears to be a consensus view among market participants.\n\n7. Identify meaningful contrarian or minority views.\n\n8. Determine the likely significance of the story for:\n   - Indian financial markets\n   - global markets where relevant\n   - sectors\n   - individual companies\n   - investors\n\n9. Identify companies, stocks, sectors, regulators, institutions or market participants affected.\n\n10. Determine the overall market sentiment:\nBullish, Bearish, Neutral, Mixed or Unclear.\n\n11. Identify potential investor implications.\n\n12. Identify any emerging narrative or trend that could become important.\n\n13. Identify the strongest professional content opportunity for LinkedIn/X.\n\n14. Separate confirmed facts from opinions, commentary and speculation.\n\n15. Provide the most important takeaways for a finance professional.\n\nIMPORTANT:\nSocial-media content must NEVER automatically be treated as fact.\nUse LinkedIn and X primarily to understand sentiment, narratives, professional opinions, consensus and contrarian viewpoints.\n\nReturn ONLY valid JSON.\n\nUse exactly this structure:\n\n{\n  \"verified\": true,\n  \"confidence_score\": 0,\n  \"confirmed_facts\": [],\n  \"additional_facts\": [],\n  \"conflicting_information\": [],\n  \"market_significance\": \"\",\n  \"affected_entities\": [],\n  \"investor_implications\": \"\",\n  \"professional_takeaways\": [],\n  \"research_summary\": \"\",\n  \"industry_sentiment\": \"Bullish | Bearish | Neutral | Mixed | Unclear\",\n  \"dominant_narrative\": \"\",\n  \"consensus_view\": \"\",\n  \"contrarian_views\": [],\n  \"linkedin_insights\": [],\n  \"x_insights\": [],\n  \"emerging_trends\": [],\n  \"content_opportunity\": \"\",\n  \"content_opportunity_score\": 0\n}\n\nRules:\n\n- confidence_score must be between 0 and 100.\n- content_opportunity_score must be between 0 and 100.\n- Do not invent facts.\n- Do not treat social-media opinions as confirmed facts.\n- Do not assume consensus from only one or two posts.\n- Clearly identify uncertainty.\n- Distinguish facts from interpretation.\n- Prefer reliable web research for factual verification.\n- Use LinkedIn and X for sentiment, narratives and professional viewpoints.\n- If social intelligence is unavailable, return empty arrays or \"Unclear\" rather than inventing insights.\n- Keep the analysis professional, concise and suitable for a corporate finance audience.\n- Return no Markdown and no text outside the JSON.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3504,
+        128
+      ],
+      "id": "1c86b1a0-39ae-425c-b417-22de78b41949",
+      "name": "Research Analyst"
+    },
+    {
+      "parameters": {
+        "model": "inclusionai/ling-3.0-flash-fin:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3504,
+        336
+      ],
+      "id": "c51292ea-160b-43ae-8544-3a8a181bb738",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior financial journalist, investment research editor and market-intelligence strategist.\n\nYour job is to transform the research analyst's output into a concise, executive-quality financial intelligence briefing.\n\nThe briefing should be suitable for:\n- Investment professionals\n- Portfolio managers\n- Equity analysts\n- Traders\n- Fintech executives\n- Corporate finance professionals\n- Senior management\n\nORIGINAL ARTICLE\n\nTitle:\n{{ $('Remove Duplicates').item.json.title }}\n\nURL:\n{{ $('Remove Duplicates').item.json.link }}\n\nRESEARCH ANALYST OUTPUT\n\n{{ $json.output }}\n\nCreate the following briefing:\n\n1. HEADLINE\nWrite a professional, information-rich headline.\nAvoid clickbait.\n\n2. EXECUTIVE SUMMARY\nSummarize the development in 3-5 sentences.\n\nExplain:\n- What happened\n- Why it matters\n- The broader financial/market context\n\n3. KEY FACTS\nProvide 4-6 of the most important verified facts.\n\n4. MARKET IMPACT\n\nExplain the potential implications for:\n- Indian financial markets\n- Relevant sectors\n- Relevant companies/assets\n- Global markets where applicable\n\nClassify the overall impact as:\nBullish | Bearish | Neutral | Mixed | Unclear\n\n5. INDUSTRY INTELLIGENCE\n\nSummarize relevant professional discussion identified from LinkedIn and X.\n\nInclude:\n- Dominant narrative\n- Industry sentiment\n- Important professional viewpoints\n\nDo NOT present social-media commentary as confirmed fact.\n\nIf meaningful social intelligence is unavailable, explicitly state that there is insufficient social intelligence rather than inventing a narrative.\n\n6. CONSENSUS VIEW\n\nExplain whether the available research and industry discussion indicate a meaningful consensus.\n\nDo not claim consensus from a very small number of sources.\n\n7. CONTRARIAN VIEW\n\nHighlight credible alternative or minority interpretations when present.\n\nIf no meaningful contrarian view was identified, say so.\n\n8. EMERGING TRENDS\n\nIdentify important themes or developments that could become more significant.\n\n9. INVESTOR TAKEAWAY\n\nExplain what professional investors should pay attention to as a result of this development.\n\nDo NOT provide personalized investment advice.\n\n10. WHY THIS MATTERS NOW\n\nExplain why this development is particularly relevant at the present time.\n\n11. CONTENT OPPORTUNITY\n\nIdentify the strongest professional discussion angle that could be developed into:\n- a LinkedIn post\n- an X post\n\nThe angle should provide insight rather than simply repeat the news.\n\n12. CONFIDENCE\n\nProvide the research confidence score from the analyst and briefly explain any major uncertainty.\n\nRULES:\n\n- Use verified information for factual claims.\n- Do not invent numbers, quotes, dates, events or facts.\n- Clearly distinguish facts from analysis and opinion.\n- Treat LinkedIn and X posts as industry commentary, not factual verification.\n- Prioritize credible research over social-media opinions when they conflict.\n- Do not exaggerate market implications.\n- Avoid sensational or promotional language.\n- Avoid generic AI-style commentary.\n- Maintain a professional institutional-finance tone.\n- Keep the briefing concise and information-dense.\n- If evidence is insufficient, explicitly state the uncertainty.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3872,
+        128
+      ],
+      "id": "b7cec961-79b8-41a0-89e1-0caec217bb38",
+      "name": "Final Finance Writer"
+    },
+    {
+      "parameters": {
+        "model": "inclusionai/ling-3.0-flash-fin:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3856,
+        368
+      ],
+      "id": "9a1baf28-3626-4e2f-bb57-5314e49e10ff",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior financial markets content strategist and institutional-quality LinkedIn writer.\n\nCreate ONE high-quality LinkedIn post using the final financial intelligence briefing below.\n\nFINAL INTELLIGENCE BRIEFING:\n{{ $json.output }}\n\nAUDIENCE:\n- Finance professionals\n- Equity and investment analysts\n- Portfolio managers\n- Traders\n- Fintech professionals and founders\n- Corporate executives\n- Serious investors\n- Professionals following Indian financial markets\n\nOBJECTIVE:\n\nDo NOT simply summarize the news.\n\nTransform the intelligence briefing into a thoughtful professional perspective that helps the reader understand:\n\n- What happened\n- Why it matters\n- What the market may be overlooking\n- What professional investors should watch next\n\nUse relevant insights from:\n- Verified news and research\n- Market impact analysis\n- Industry sentiment\n- LinkedIn/X industry intelligence\n- Consensus views\n- Contrarian views\n- Emerging trends\n\nWRITING STRUCTURE:\n\n1. HOOK\n\nStart with a strong, intelligent observation.\n\nAvoid:\n- Clickbait\n- Sensational claims\n- Generic phrases such as \"Big news!\"\n- Excessive emojis\n\n2. WHAT HAPPENED\n\nExplain the development clearly and concisely.\n\n3. WHY IT MATTERS\n\nExplain the financial, economic, sector or market significance.\n\n4. MARKET INTELLIGENCE\n\nWhere supported by the briefing, incorporate:\n- Market sentiment\n- Industry discussion\n- Consensus expectations\n- Important professional viewpoints\n\nDo not present social-media opinions as facts.\n\n5. THE DIFFERENT ANGLE\n\nIf the research identifies a credible contrarian view, overlooked risk, second-order effect or emerging narrative, highlight it.\n\nThis should be the most intellectually valuable part of the post.\n\n6. INVESTOR PERSPECTIVE\n\nExplain what professional investors and market participants should monitor next.\n\nDo NOT provide personalized investment advice.\n\n7. ENDING\n\nEnd with ONE thoughtful question designed to encourage genuine professional discussion.\n\nSTYLE:\n\n- Professional institutional-finance tone\n- Intelligent but easy to read\n- Short paragraphs\n- Natural human writing\n- Specific rather than generic\n- Insight-led rather than engagement-led\n- Avoid repetitive AI-style sentence structures\n- Avoid unnecessary headings inside the post\n- Avoid excessive emojis\n- Avoid exaggerated claims\n- Avoid generic motivational language\n- Never invent statistics, quotes or facts\n\nIMPORTANT:\n\nThe post must add analysis or perspective beyond simply repeating the underlying news.\n\nIf social intelligence is weak or unavailable, do not mention it.\n\nIf there is no credible contrarian view, do not manufacture one.\n\nIf uncertainty exists, communicate it clearly.\n\nUse 3-5 relevant professional hashtags at the end.\n\nTARGET LENGTH:\n180-280 words.\n\nReturn ONLY the finished LinkedIn post.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4240,
+        128
+      ],
+      "id": "c5dae455-0172-47dc-826f-60eeb362626f",
+      "name": "LinkedIn Writer"
+    },
+    {
+      "parameters": {
+        "model": "inclusionai/ling-3.0-flash-fin:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        4240,
+        368
+      ],
+      "id": "03054a70-2fbe-4083-a68a-5b854a8a23e4",
+      "name": "OpenRouter Chat Model3",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior financial markets strategist and professional X content writer.\n\nCreate ONE high-quality X post based on the final financial intelligence briefing.\n\nFINAL INTELLIGENCE BRIEFING:\n{{ $('Final Finance Writer').item.json.output }}\n\nAUDIENCE:\n- Investors\n- Traders\n- Equity analysts\n- Portfolio managers\n- Finance professionals\n- Fintech professionals\n- People following Indian financial markets\n\nOBJECTIVE:\n\nDo NOT simply repeat the headline.\n\nExtract the single most valuable market insight from the briefing.\n\nPrioritize, where supported:\n- Market implications\n- Investor implications\n- Industry sentiment\n- Consensus expectations\n- Contrarian viewpoints\n- Emerging trends\n- What the market should watch next\n\nWRITING STRUCTURE:\n\n1. Start immediately with the strongest insight or development.\n\n2. Explain why it matters to markets or investors.\n\n3. Where useful, highlight one differentiated insight such as:\n   - an overlooked implication\n   - a credible contrarian view\n   - an emerging trend\n   - an important risk\n   - what investors should monitor next\n\n4. End with a thoughtful question ONLY when it adds value and fits naturally.\n\nSTYLE:\n\n- Professional financial-market tone\n- Concise\n- High information density\n- Natural human writing\n- Insight-led rather than engagement-led\n- No clickbait\n- No sensational language\n- No generic motivational language\n- No unnecessary emojis\n- No personalized investment advice\n- Never invent facts, statistics or quotes\n\nIMPORTANT:\n\nTreat LinkedIn/X industry commentary as opinion or sentiment, not verified fact.\n\nIf social intelligence is weak, ignore it.\n\nIf there is no credible contrarian insight, do not manufacture one.\n\nUse the strongest verified insight from the briefing.\n\nUse 1-2 relevant hashtags only when they add value.\n\nSTRICT LENGTH RULE:\n\nThe COMPLETE final post, including hashtags and punctuation, must be 280 characters or fewer.\n\nIf the first draft exceeds 280 characters, rewrite it until it fits.\n\nReturn ONLY the finished X post.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4608,
+        128
+      ],
+      "id": "177888d8-6834-4af4-99d4-41f94f58e508",
+      "name": "X Writer"
+    },
+    {
+      "parameters": {
+        "model": "inclusionai/ling-3.0-flash-fin:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        4608,
+        384
+      ],
+      "id": "40aa670b-6aec-413e-83d1-3886806c0c72",
+      "name": "OpenRouter Chat Model4",
+      "credentials": {
+        "openRouterApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1264,
+        -16
+      ],
+      "id": "d72090e8-4c14-424a-a55c-4bb63be347c7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2640,
+        -64
+      ],
+      "id": "327bdd5a-1756-457e-bd85-ebf38397bc5c",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Finance Content Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.setZone('Asia/Kolkata').toFormat('dd-MM-yyyy hh:mm a') }}",
+            "Title": "={{ $('Code in JavaScript').item.json.title }}",
+            "URL": "={{ $('Code in JavaScript').item.json.link }}",
+            "Category": "={{ $('Code in JavaScript').item.json.category }}",
+            "Importance Score": "={{ $('Code in JavaScript').item.json.importance_score }}",
+            "Market Impact": "={{ $('Code in JavaScript').item.json.market_impact }}",
+            "Summary": "={{ $('Code in JavaScript').item.json.summary }}",
+            "Invester Relevance": "={{ $('Code in JavaScript').item.json.investor_relevance }}",
+            "LinkedIn Post": "={{ $('LinkedIn Writer').item.json.output }}",
+            "X Post": "={{ $('X Writer').item.json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Importance Score",
+              "displayName": "Importance Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Market Impact",
+              "displayName": "Market Impact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invester Relevance",
+              "displayName": "Invester Relevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn Post",
+              "displayName": "LinkedIn Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "X Post",
+              "displayName": "X Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4976,
+        144
+      ],
+      "id": "a44a5f8a-294e-475c-a15f-784ffee961d9",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_TAVILY_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"site:x.com {{ $json.title }}\",\n  \"search_depth\": \"basic\",\n  \"max_results\": 5\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2704,
+        448
+      ],
+      "id": "267f41a6-2d3f-4150-ae67-af35d9a7b34d",
+      "name": "X Intelligence",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_TAVILY_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"site:linkedin.com/posts {{ $json.title }}\",\n  \"search_depth\": \"basic\",\n  \"max_results\": 5\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2704,
+        720
+      ],
+      "id": "5fd03ca4-3683-4c75-b77d-864db0e83fdc",
+      "name": "Linkedin Intelligence",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const articleTitle = $('Filter1').item.json.title || \"\";\nconst results = Array.isArray($json.results) ? $json.results : [];\n\nif (results.length === 0) {\n  return [{\n    json: {\n      platform: \"LinkedIn\",\n      article_title: articleTitle,\n      title: \"\",\n      url: \"\",\n      content: \"\",\n      published_date: \"\",\n      available: false\n    }\n  }];\n}\n\nreturn results.map(item => ({\n  json: {\n    platform: \"LinkedIn\",\n    article_title: articleTitle,\n    title: item.title || \"\",\n    url: item.url || \"\",\n    content: item.content || \"\",\n    published_date: item.published_date || \"\",\n    available: true\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3104,
+        720
+      ],
+      "id": "c0352837-67bc-4209-8797-3200363ea1d8",
+      "name": "LinkedIn Intelligence Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "const articleTitle = $('Filter1').item.json.title || \"\";\nconst results = Array.isArray($json.results) ? $json.results : [];\n\nif (results.length === 0) {\n  return [{\n    json: {\n      platform: \"X\",\n      article_title: articleTitle,\n      title: \"\",\n      url: \"\",\n      content: \"\",\n      published_date: \"\",\n      available: false\n    }\n  }];\n}\n\nreturn results.map(item => ({\n  json: {\n    platform: \"X\",\n    article_title: articleTitle,\n    title: item.title || \"\",\n    url: item.url || \"\",\n    content: item.content || \"\",\n    published_date: item.published_date || \"\",\n    available: true\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        464
+      ],
+      "id": "6e2e1ac2-edd6-45b3-b881-02b209c848ee",
+      "name": "X Intelligence Parser"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3552,
+        608
+      ],
+      "id": "f3cc8be9-9c20-42cb-82cb-0fb415d8f40b",
+      "name": "Merge Social Intelligence"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst grouped = {};\n\nfor (const item of items) {\n  const articleTitle = item.json.article_title || \"Unknown Article\";\n\n  if (!grouped[articleTitle]) {\n    grouped[articleTitle] = [];\n  }\n\n  if (item.json.available === false) {\n    continue;\n  }\n\n  grouped[articleTitle].push({\n    platform: item.json.platform || \"\",\n    title: item.json.title || \"\",\n    content: item.json.content || \"\",\n    url: item.json.url || \"\",\n    published_date: item.json.published_date || \"\"\n  });\n}\n\nreturn Object.entries(grouped).map(([articleTitle, posts]) => ({\n  json: {\n    article_title: articleTitle,\n    social_intelligence: posts\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        624
+      ],
+      "id": "3a047ef4-3ac1-42ab-8ee3-72b61664cf7d",
+      "name": "Social Intelligence Formatter"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "article_title",
+              "field2": "title"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4240,
+        640
+      ],
+      "id": "2dee35d2-8e2d-445a-9f28-0168658dfc62",
+      "name": "Merge News + Social Intelligence"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2848,
+        128
+      ],
+      "id": "77f77f89-2b46-49e8-abd3-a5a49b93a876",
+      "name": "Merge Research Intelligence"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3200,
+        128
+      ],
+      "id": "de766992-3c10-45ff-b06e-27cc63bd543e",
+      "name": "Merge All Intelligence"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Research Intelligence",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "X Intelligence",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Linkedin Intelligence",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge News + Social Intelligence",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Merge Research Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Analyst": {
+      "main": [
+        [
+          {
+            "node": "Final Finance Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Final Finance Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Finance Writer": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LinkedIn Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Writer": {
+      "main": [
+        [
+          {
+            "node": "X Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "X Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X Writer": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linkedin Intelligence": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Intelligence Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X Intelligence": {
+      "main": [
+        [
+          {
+            "node": "X Intelligence Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X Intelligence Parser": {
+      "main": [
+        [
+          {
+            "node": "Merge Social Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Intelligence Parser": {
+      "main": [
+        [
+          {
+            "node": "Merge Social Intelligence",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Social Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Social Intelligence Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Intelligence Formatter": {
+      "main": [
+        [
+          {
+            "node": "Merge News + Social Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Research Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Merge All Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Research Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge News + Social Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Merge All Intelligence",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
