@@ -136,7 +136,9 @@ The architecture can be adapted for:
 
 ## Workflow Preview
 
-Workflow screenshots and output examples will be added to this repository.
+Below is the complete n8n workflow running successfully end-to-end.
+
+![Financial Market Intelligence n8n Workflow](workflow-preview.png)
 
 ## 🔐 Security
 
