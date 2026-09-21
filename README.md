@@ -147,3 +147,17 @@ The public workflow version does not contain production API keys, authentication
 ## 📌 Project Status
 
 **Working prototype — successfully tested end-to-end with structured Google Sheets output.**
+
+## 📊 Example Output
+
+The workflow converts raw financial news into structured market intelligence that can be used by analysts, investors, research teams and content teams.
+
+The output includes:
+
+- News classification
+- Importance scoring
+- Market-impact assessment
+- AI-generated financial summary
+- Investor relevance analysis
+
+![Financial Market Intelligence Output](output-preview.png)
